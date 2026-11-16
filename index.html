@@ -96,9 +96,9 @@ const have=k=>S.pantry.some(p=>p.k===k);
 function planText(){return '🍲 جدول الأكل الأسبوعي:\n'+S.plan.map(p=>p.d+': '+(p.r<0?'-':R[p.r].e+' '+R[p.r].n)).join('\n')}
 function recText(i){const r=R[i];return `${r.e} ${r.n}\nالمكونات: ${r.g.join('، ')}\n${r.s.map((x,j)=>(j+1)+'. '+x).join('\n')}`}
 function modal(h){const m=$('#m');m.innerHTML='<div class="sh" role="dialog">'+h+'</div>';m.classList.add('on')}
-function close(){$('#m').classList.remove('on')}
-$('#m').addEventListener('click',e=>{if(e.target.id==='m')close()});
-function open(i){const r=R[i];modal(`<div class="hero" style="background:${r.c}">${r.e}</div><button class="x sec" onclick="close()">إغلاق</button><h2 style="margin-top:0">${r.n}</h2>
+function closeModal(){$('#m').classList.remove('on')}
+$('#m').addEventListener('click',e=>{if(e.target.id==='m')closeModal()});
+function openRecipe(i){const r=R[i];modal(`<div class="hero" style="background:${r.c}">${r.e}</div><button class="x sec" onclick="closeModal()">إغلاق</button><h2 style="margin-top:0">${r.n}</h2>
 <b>المكونات</b>${r.g.map(k=>`<div class="ing"><span class="${have(k)?'ok':'warn'}">${have(k)?'✔':'✖'}</span>${k}${have(k)?'':' (ناقص)'}</div>`).join('')}
 <p style="color:var(--mut);margin:6px 0">الملح والزيت والتوابل والمية متوقعة موجودة.</p>
 <b>الطريقة</b><ol>${r.s.map(x=>`<li>${x}</li>`).join('')}</ol>
@@ -107,15 +107,15 @@ function open(i){const r=R[i];modal(`<div class="hero" style="background:${r.c}"
 function shrink(f){return new Promise(ok=>{const im=new Image();im.onload=()=>{const s=Math.min(1,520/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};im.src=URL.createObjectURL(f)})}
 async function photo(i,f){if(!f)return;const img=await shrink(f);const g={id:Date.now(),i,img,t:new Date().toLocaleDateString('ar-EG')};S.gal.unshift(g);save();toast('اتحفظت في أكلاتي');dish(g.id)}
 function dish(id){const g=S.gal.find(x=>x.id===id);if(!g)return;const r=R[g.i];
- modal(`<button class="x sec" onclick="close()">إغلاق</button><h2>${r.e} ${r.n}</h2><img src="${g.img}" alt="${r.n}" style="width:100%;border-radius:18px"><small>${g.t}</small>
+ modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>${r.e} ${r.n}</h2><img src="${g.img}" alt="${r.n}" style="width:100%;border-radius:18px"><small>${g.t}</small>
 <div class="row"><button class="pri" onclick="shareDish(${id})">📣 شاركيها على السوشيال</button><button class="dng" onclick="del(${id})">مسح</button></div>`)}
 const dishText=g=>`طبخت النهاردة ${R[g.i].n} ${R[g.i].e} #إيه_الأكل_النهاردة`;
 function shareDish(id){const g=S.gal.find(x=>x.id===id);share(dishText(g),g.img)}
-function del(id){S.gal=S.gal.filter(x=>x.id!==id);save();close();draw()}
+function del(id){S.gal=S.gal.filter(x=>x.id!==id);save();closeModal();draw()}
 async function share(text,img){
  try{if(navigator.share){const d={text};if(img){const f=new File([await (await fetch(img)).blob()],'akla.jpg',{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[f]}))d.files=[f]}await navigator.share(d);return}}catch(e){if(e&&e.name==='AbortError')return}
  const q=encodeURIComponent(text);
- modal(`<button class="x sec" onclick="close()">إغلاق</button><h2>ابعتي لـ…</h2><div class="row"><a class="pri" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/?text=${q}">واتساب</a><a class="sec" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700;color:var(--ink)" href="sms:?&body=${q}">رسالة SMS</a><button class="sec" onclick="copy(${JSON.stringify(text).replace(/"/g,'&quot;')})">نسخ النص</button></div><p style="color:var(--mut)">لو عايزة تنزّلي الصورة على فيسبوك أو إنستجرام، احفظيها وانشريها من التطبيق.</p>`)}
+ modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>ابعتي لـ…</h2><div class="row"><a class="pri" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/?text=${q}">واتساب</a><a class="sec" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700;color:var(--ink)" href="sms:?&body=${q}">رسالة SMS</a><button class="sec" onclick="copy(${JSON.stringify(text).replace(/"/g,'&quot;')})">نسخ النص</button></div><p style="color:var(--mut)">لو عايزة تنزّلي الصورة على فيسبوك أو إنستجرام، احفظيها وانشريها من التطبيق.</p>`)}
 function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('اتنسخ'),()=>toast('مقدرتش أنسخ'))}catch(e){toast('مقدرتش أنسخ')}}
 
 const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -150,7 +150,7 @@ function draw(){document.querySelectorAll('#n button').forEach((b,i)=>b.classLis
   (S.pantry.length?Object.keys(cats).map(c=>`<h2>${c}</h2><div class="chips">${cats[c].map(p=>`<div class="chip">${p.icon} ${esc(p.k)}<button aria-label="نقّصي" onclick="bump('${esc(p.k)}',-1)">−</button><b>${p.uses}</b><button aria-label="زوّدي" onclick="bump('${esc(p.k)}',1)">+</button></div>`).join('')}</div>`).join('')+`<div class="row"><button class="pri" onclick="tab=1;makePlan()">📅 اعرضي جدول الأسبوع</button><button class="sec" onclick="newWeek()">ابدئي أسبوع جديد</button></div>`:`<div class="empty"><div>🧺</div>الخزين فاضي. قولي أو اكتبي أول أصنافك.</div>`)+
   `<details class="card" style="margin-top:14px"><summary><b>📲 ثبّتيه كتطبيق على الموبايل</b></summary><p>أندرويد: من قايمة كروم (⋮) اختاري «تثبيت التطبيق» أو «إضافة للشاشة الرئيسية».<br>آيفون: من سفاري دوسي على زرار المشاركة ثم «إضافة إلى الشاشة الرئيسية».</p></details>`}
  else if(tab===1){v.innerHTML=S.plan.length?`<div class="row" style="margin:0 0 12px"><button class="pri" onclick="makePlan()">🔄 جدول جديد</button><button class="sec" onclick="share(planText())">💬 ابعتي الجدول</button></div>`+S.plan.map(p=>{if(p.r<0)return`<div class="day" style="cursor:default"><div class="tile" style="background:var(--bg)">➕</div><div><b>${p.d}</b><small>الخزين مش كفاية، ضيفي أصناف</small></div></div>`;const r=R[p.r],m=r.g.filter(k=>!have(k));
-   return`<button class="day" onclick="open(${p.r})"><div class="tile" style="background:${r.c}">${r.e}</div><div><b>${p.d}: ${r.n}</b><small class="${m.length?'warn':''}">${m.length?'ناقص: '+m.join('، '):'كل مكوناتها موجودة عندك ✔'}</small></div></button>`}).join(''):`<div class="empty"><div>📅</div>قولي الخزين وأنا هملا الجدول لوحدي.<div class="row" style="justify-content:center"><button class="pri" onclick="tab=0;draw()">🎤 سجّلي الخزين</button></div></div>`}
+   return`<button class="day" onclick="openRecipe(${p.r})"><div class="tile" style="background:${r.c}">${r.e}</div><div><b>${p.d}: ${r.n}</b><small class="${m.length?'warn':''}">${m.length?'ناقص: '+m.join('، '):'كل مكوناتها موجودة عندك ✔'}</small></div></button>`}).join(''):`<div class="empty"><div>📅</div>قولي الخزين وأنا هملا الجدول لوحدي.<div class="row" style="justify-content:center"><button class="pri" onclick="tab=0;draw()">🎤 سجّلي الخزين</button></div></div>`}
  else{v.innerHTML=S.gal.length?`<div class="row" style="margin:0 0 12px"><button class="sec" onclick="share('معرض أكلاتي:\\n'+S.gal.map(g=>R[g.i].e+' '+R[g.i].n+' ('+g.t+')').join('\\n'))">📣 شاركي أكلاتي</button></div><div class="grid">${S.gal.map(g=>`<button class="dish" onclick="dish(${g.id})"><img src="${g.img}" alt="${R[g.i].n}"><div><b>${R[g.i].e} ${R[g.i].n}</b><br><small style="color:var(--mut)">${g.t}</small></div></button>`).join('')}</div>`:`<div class="empty"><div>📖</div>لسه مفيش أكلات. افتحي أي أكلة في الجدول وصوّريها بعد ما تخلصيها.</div>`}}
 $('#n').innerHTML=[['🧺','الخزين'],['📅','الجدول'],['📖','أكلاتي']].map((t,i)=>`<button onclick="tab=${i};draw()"><span>${t[0]}</span>${t[1]}</button>`).join('');
 draw();
