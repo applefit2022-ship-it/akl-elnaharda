@@ -44,36 +44,27 @@ nav button span{font-size:22px}nav button.on{color:var(--teal)}
 #t{position:fixed;bottom:96px;inset-inline:16px;margin:auto;max-width:420px;background:#17302e;color:#fff;padding:10px 14px;border-radius:14px;text-align:center;display:none;z-index:10}
 .empty{text-align:center;color:var(--mut);padding:24px 10px}.empty div{font-size:44px}
 .mic{width:128px;height:128px;border-radius:50%;background:var(--gold);color:#2a1d00;font-size:56px;box-shadow:0 8px 24px #f2a90066;padding:0}.mic.live{animation:p 1s infinite}@keyframes p{50%{transform:scale(1.07)}}@media(prefers-reduced-motion:reduce){.mic.live{animation:none}}summary{cursor:pointer}
+.srch{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px}.cats button{flex:none;background:var(--card);color:var(--ink);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:14px}.cats button.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.chk{display:block;margin:4px 0;color:var(--ink)}
+.rrow{display:flex;gap:10px;align-items:center;width:100%;text-align:right;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:16px;padding:8px;margin-bottom:8px}.rrow small{display:block;color:var(--mut)}
+.tile.sm{width:48px;height:48px;font-size:26px;border-radius:12px}
 </style></head><body>
 <header><h1>🍲 إيه الأكل النهاردة؟</h1><p>قوليلنا إيه اللي في بيتك، ونحنا نقولك تطبخي إيه الأسبوع كله.</p></header>
 <main id="v"></main>
 <nav id="n"></nav><div id="m"></div><div id="t" role="status"></div>
-<script>
+<script src="data/ing.js"></script><script src="data/r1.js"></script><script src="data/r2.js"></script><script src="data/r3.js"></script><script src="data/r4.js"></script><script src="data/r5.js"></script><script src="data/r6.js"></script><script src="data/r7.js"></script><script src="data/r8.js"></script><script>
 const DAYS=['السبت','الأحد','الإثنين','التلات','الأربع','الخميس','الجمعة'];
-const ING=[['أرز','حبوب وبقوليات','🍚','رز,ارز'],['مكرونة','حبوب وبقوليات','🍝','مكرونه,معكرونه,اسباجتي'],['عدس','حبوب وبقوليات','🫘','عدس'],['فول','حبوب وبقوليات','🫘','فول'],['فراخ','لحوم وفراخ','🍗','فراخ,فرخه,دجاج,صدور'],['لحمة','لحوم وفراخ','🥩','لحمه,لحم,مفروم,كفته'],['سمك','لحوم وفراخ','🐟','سمك,بلطي,جمبري'],['بيض','ألبان وبيض','🥚','بيض'],['لبن','ألبان وبيض','🥛','لبن,حليب,زبادي,جبنه'],['طماطم','خضار','🍅','طماطم,صلصه'],['بصل','خضار','🧅','بصل'],['ثوم','خضار','🧄','ثوم'],['بطاطس','خضار','🥔','بطاطس,بطاطا'],['كوسة','خضار','🥒','كوسه,كوسا'],['باذنجان','خضار','🍆','باذنجان'],['فلفل','خضار','🫑','فلفل'],['بامية','خضار','🌿','بامي'],['ملوخية','خضار','🥬','ملوخيه'],['سبانخ','خضار','🥬','سبانخ'],['جزر','خضار','🥕','جزر'],['بسلة','خضار','🫛','بسله,بازلاء']];
-const R=[
-['كشري','🍛','#fde7b0','أرز,مكرونة,عدس,بصل,طماطم','اسلقي العدس والأرز والمكرونة كل واحد لوحده|حمّري البصل في زيت لحد ما يقرمش|اعملي صلصة من الطماطم والخل والتوابل|رصي الطبقات وزيّنيها بالبصل'],
-['ملوخية بالفراخ','🥬','#cfeccf','ملوخية,فراخ,ثوم,أرز','اسلقي الفراخ واحتفظي بالشوربة|حمّري التقلية بالثوم والكزبرة|حطي الملوخية على الشوربة على نار هادية|قدميها مع الأرز والفراخ'],
-['محشي كوسة','🥒','#d9f0d4','كوسة,أرز,طماطم,بصل','فضّي الكوسة|اخلطي الأرز بالطماطم والبصل والتوابل|احشي الكوسة ورصيها في حلة|غطيها بصلصة وسيبيها تستوي ٤٠ دقيقة'],
-['بامية باللحمة','🌿','#e2efc8','بامية,لحمة,طماطم,بصل,أرز','سوّتي اللحمة مع البصل لحد ما تستوي|زوّدي الطماطم والتوابل|حطي البامية وسيبيها ٢٥ دقيقة|قدميها مع الأرز'],
-['طاجن بطاطس بالفراخ','🥔','#f6dfc2','بطاطس,فراخ,بصل,طماطم','تبّلي الفراخ وحمّريها|قطّعي البطاطس والبصل والطماطم|حطي الكل في طاجن بمية شوية|ادخليه الفرن ٤٥ دقيقة'],
-['مكرونة بالصلصة','🍝','#fbd5cc','مكرونة,طماطم,بصل,ثوم','اسلقي المكرونة|حمّري البصل والثوم وزوّدي الطماطم|سيبي الصلصة تتسبك|اخلطيها بالمكرونة'],
-['شوربة عدس','🥣','#fde7b0','عدس,بصل,جزر,ثوم','قطّعي البصل والجزر والثوم|حطيهم مع العدس والمية على النار|اضربيها في الخلاط|تبّليها بالكمون والليمون'],
-['سبانخ بالأرز','🥬','#cfeccf','سبانخ,أرز,بصل','حمّري البصل|زوّدي السبانخ لحد ما تدبل|زوّدي مية وتوابل وسيبيها تستوي|قدميها مع الأرز'],
-['مسقعة','🍆','#e4d3ee','باذنجان,طماطم,فلفل,ثوم','قطّعي الباذنجان وحمّريه|اعملي صلصة بالطماطم والفلفل والثوم|اخلطيهم وسيبيهم ١٥ دقيقة|قدميها سخنة أو باردة'],
-['بسلة باللحمة','🫛','#d9f0d4','بسلة,لحمة,جزر,بصل','سوّتي اللحمة مع البصل|زوّدي الجزر والبسلة والطماطم|سيبيها على نار هادية ٣٠ دقيقة'],
-['سمك مقلي بالأرز','🐟','#cfe6f3','سمك,أرز,ثوم','تبّلي السمك بالثوم والكمون|اقليه في زيت سخن|اعملي الأرز على جنب'],
-['عجة بطاطس','🍳','#fff0b8','بيض,بطاطس,بصل','اقلي البطاطس والبصل|اضربي البيض وزوّديه عليهم|سوّيها على الوشين'],
-['فول بالطماطم','🫘','#f1dcc0','فول,طماطم,بصل','سوّي الفول على نار هادية|زوّدي الطماطم والبصل المحمّر|قدميه بزيت وكمون وليمون'],
-['شكشوكة','🍳','#fbd5cc','بيض,طماطم,فلفل,بصل','حمّري البصل والفلفل|زوّدي الطماطم وسيبيها تتسبك|اكسري البيض فوقها وغطيها ٥ دقايق'],
-['فراخ مشوية بالفرن','🍗','#f6dfc2','فراخ,بطاطس,ثوم','تبّلي الفراخ بالثوم والتوابل|رصيها مع البطاطس في صينية|الفرن ٥٠ دقيقة']
-].map(a=>({n:a[0],e:a[1],c:a[2],g:a[3].split(','),s:a[4].split('|')}));
+const CAT={محشي:['#d9f0d4',1],خضار:['#e2efc8',1],لحوم:['#f6dfc2',1],فراخ:['#fde7b0',1],سمك:['#cfe6f3',1],أرز:['#fbe9c6',1],شوربة:['#fde7b0',1],بقوليات:['#f1dcc0',1],مقبلات:['#cfeccf',0],مخبوزات:['#f6dfc2',0],حلويات:['#fbd5cc',0],فطار:['#fff0b8',0]};
+const R=(window.RAW||[]).map(l=>{const a=l.split('|');if(a.length<8)return null;const c=CAT[a[2]]||['#eee',0];return{n:a[0],e:a[1],cat:a[2],t:+a[3],sv:+a[4],g:a[5].split(','),i:a[6].split(';').map(x=>x.trim()),s:a[7].split(';').map(x=>x.trim()),c:c[0],m:c[1]}}).filter(Boolean);
+const RI={};R.forEach(r=>RI[r.n]=r);
 const $=s=>document.querySelector(s);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>s.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/[ً-ٟ]/g,'');
 let S;try{S=JSON.parse(localStorage.getItem('akl')||'null')}catch(e){}S=S||{pantry:[],plan:[],gal:[]};
+if(S.plan.some(p=>!('n' in p)))S.plan=[];S.gal=(S.gal||[]).filter(g=>g.n);
 let warned=0;const save=()=>{try{localStorage.setItem('akl',JSON.stringify(S))}catch(e){if(!warned++)toast('مساحة الحفظ خلصت. امسحي صور قديمة.')}};
-let tab=0;
+let tab=0;const lib={q:'',cat:'',ok:0,n:30};
 function toast(m){const t=$('#t');t.textContent=m;t.style.display='block';clearTimeout(toast.i);toast.i=setTimeout(()=>t.style.display='none',2800)}
 function parse(t){
  t=t.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d));
@@ -83,43 +74,6 @@ function parse(t){
   if(!name)return null;const nn=norm(name),g=ING.find(i=>i[3].split(',').some(a=>nn.includes(a)));
   return{k:g?g[0]:name,cat:g?g[1]:'حاجات تانية',icon:g?g[2]:'🥣',uses:Math.max(1,Math.round(n?(kg?n*3:n):3))}
  }).filter(Boolean)}
-function bump(k,d){const p=S.pantry.find(p=>p.k===k);p.uses+=d;if(p.uses<1)S.pantry=S.pantry.filter(x=>x!==p);S.plan=[];save();draw()}
-function makePlan(){
- if(!S.pantry.length)return toast('ضيفي الخزين الأول');
- const st={};S.pantry.forEach(p=>st[p.k]=p.uses);const used=new Set();
- S.plan=DAYS.map(d=>{let best=-1,bs=-1;
-  R.forEach((r,i)=>{if(used.has(i))return;const miss=r.g.filter(k=>!(st[k]>0));if(miss.length>1)return;
-   const sc=(miss.length?0:100)+r.g.reduce((a,k)=>a+(st[k]||0),0);if(sc>bs){bs=sc;best=i}});
-  if(best<0)return{d,r:-1};used.add(best);R[best].g.forEach(k=>{if(st[k]>0)st[k]--});return{d,r:best}});
- save();draw()}
-const have=k=>S.pantry.some(p=>p.k===k);
-function planText(){return '🍲 جدول الأكل الأسبوعي:\n'+S.plan.map(p=>p.d+': '+(p.r<0?'-':R[p.r].e+' '+R[p.r].n)).join('\n')}
-function recText(i){const r=R[i];return `${r.e} ${r.n}\nالمكونات: ${r.g.join('، ')}\n${r.s.map((x,j)=>(j+1)+'. '+x).join('\n')}`}
-function modal(h){const m=$('#m');m.innerHTML='<div class="sh" role="dialog">'+h+'</div>';m.classList.add('on')}
-function closeModal(){$('#m').classList.remove('on')}
-$('#m').addEventListener('click',e=>{if(e.target.id==='m')closeModal()});
-function openRecipe(i){const r=R[i];modal(`<div class="hero" style="background:${r.c}">${r.e}</div><button class="x sec" onclick="closeModal()">إغلاق</button><h2 style="margin-top:0">${r.n}</h2>
-<b>المكونات</b>${r.g.map(k=>`<div class="ing"><span class="${have(k)?'ok':'warn'}">${have(k)?'✔':'✖'}</span>${k}${have(k)?'':' (ناقص)'}</div>`).join('')}
-<p style="color:var(--mut);margin:6px 0">الملح والزيت والتوابل والمية متوقعة موجودة.</p>
-<b>الطريقة</b><ol>${r.s.map(x=>`<li>${x}</li>`).join('')}</ol>
-<div class="row"><label class="pri" style="border-radius:14px;padding:10px 16px;font-weight:700;cursor:pointer">📸 خلصتها! صوّري الأكلة<input type="file" accept="image/*" capture="environment" hidden onchange="photo(${i},this.files[0])"></label>
-<button class="sec" onclick="share(recText(${i}))">💬 ابعتي الوصفة لصاحبتك</button></div>`)}
-function shrink(f){return new Promise(ok=>{const im=new Image();im.onload=()=>{const s=Math.min(1,520/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};im.src=URL.createObjectURL(f)})}
-async function photo(i,f){if(!f)return;const img=await shrink(f);const g={id:Date.now(),i,img,t:new Date().toLocaleDateString('ar-EG')};S.gal.unshift(g);save();toast('اتحفظت في أكلاتي');dish(g.id)}
-function dish(id){const g=S.gal.find(x=>x.id===id);if(!g)return;const r=R[g.i];
- modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>${r.e} ${r.n}</h2><img src="${g.img}" alt="${r.n}" style="width:100%;border-radius:18px"><small>${g.t}</small>
-<div class="row"><button class="pri" onclick="shareDish(${id})">📣 شاركيها على السوشيال</button><button class="dng" onclick="del(${id})">مسح</button></div>`)}
-const dishText=g=>`طبخت النهاردة ${R[g.i].n} ${R[g.i].e} #إيه_الأكل_النهاردة`;
-function shareDish(id){const g=S.gal.find(x=>x.id===id);share(dishText(g),g.img)}
-function del(id){S.gal=S.gal.filter(x=>x.id!==id);save();closeModal();draw()}
-async function share(text,img){
- try{if(navigator.share){const d={text};if(img){const f=new File([await (await fetch(img)).blob()],'akla.jpg',{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[f]}))d.files=[f]}await navigator.share(d);return}}catch(e){if(e&&e.name==='AbortError')return}
- const q=encodeURIComponent(text);
- modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>ابعتي لـ…</h2><div class="row"><a class="pri" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/?text=${q}">واتساب</a><a class="sec" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700;color:var(--ink)" href="sms:?&body=${q}">رسالة SMS</a><button class="sec" onclick="copy(${JSON.stringify(text).replace(/"/g,'&quot;')})">نسخ النص</button></div><p style="color:var(--mut)">لو عايزة تنزّلي الصورة على فيسبوك أو إنستجرام، احفظيها وانشريها من التطبيق.</p>`)}
-function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('اتنسخ'),()=>toast('مقدرتش أنسخ'))}catch(e){toast('مقدرتش أنسخ')}}
-
-const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
-let listening=false,fb=!SRc;
 function vparse(t){
  t=norm(t.replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
  t=t.replace(/(^|\s)(واحد|اتنين|تنين|تلاته|اربعه|خمسه)(?=\s|$)/g,(m,a,w)=>a+({واحد:1,اتنين:2,تنين:2,تلاته:3,اربعه:4,خمسه:5})[w]);
@@ -131,28 +85,73 @@ function vparse(t){
   if(m){n=+m[1];kg=!!m[2]}else{const m2=a.match(/^\s*(\d+(?:\.\d+)?)\s*(كيلو|كجم)?/);if(m2){n=+m2[1];kg=!!m2[2]}}
   out.push({k:g[0],cat:g[1],icon:g[2],uses:Math.max(1,Math.round(n?(kg?n*3:n):3))})});
  return out}
-function heard(t){const items=vparse(t||'');if(!items.length)return toast('مسمعتش أصناف، جربي تاني');
- items.forEach(i=>{const o=S.pantry.find(p=>p.k===i.k);o?o.uses+=i.uses:S.pantry.push(i)});
- tab=1;makePlan();toast('تمام! رتّبت الخزين وعملت الجدول')}
+function merge(items){items.forEach(i=>{const o=S.pantry.find(p=>p.k===i.k);o?o.uses+=i.uses:S.pantry.push(i)})}
+function heard(t){const items=vparse(t||'');if(!items.length)return toast('مسمعتش أصناف، جربي تاني');merge(items);tab=1;makePlan();toast('تمام! رتّبت الخزين وعملت الجدول')}
+function add(){const items=parse($('#inp').value);if(!items.length)return toast('اكتبي أو قولي أصناف الخزين الأول');merge(items);tab=1;makePlan();toast('اتصنّف الخزين وجدول الأسبوع جاهز')}
+const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
+let listening=false,fb=!SRc;
 function listen(){
  if(!SRc){fb=true;return draw()}
  try{const r=new SRc();r.lang='ar-EG';r.onstart=()=>{listening=true;draw()};r.onend=()=>{listening=false;draw()};
   r.onresult=e=>heard(e.results[0][0].transcript);
   r.onerror=()=>{fb=true;listening=false;toast('الميكروفون مش متاح هنا');draw()};r.start()}catch(e){fb=true;draw()}}
-function add(){const items=parse($('#inp').value);if(!items.length)return toast('اكتبي أو قولي أصناف الخزين الأول');
- items.forEach(i=>{const o=S.pantry.find(p=>p.k===i.k);o?o.uses+=i.uses:S.pantry.push(i)});
- tab=1;makePlan();toast('اتصنّف الخزين وجدول الأسبوع جاهز')}
+function bump(k,d){const p=S.pantry.find(p=>p.k===k);p.uses+=d;if(p.uses<1)S.pantry=S.pantry.filter(x=>x!==p);S.plan=[];save();draw()}
 function newWeek(){S.pantry=[];S.plan=[];save();tab=0;draw()}
+const have=k=>S.pantry.some(p=>p.k===k);
+function makePlan(){
+ if(!S.pantry.length)return toast('ضيفي الخزين الأول');
+ const st={};S.pantry.forEach(p=>st[p.k]=p.uses);const used=new Set(),cc={};
+ S.plan=DAYS.map(d=>{let best=null,bs=-1e9;
+  R.forEach(r=>{if(!r.m||used.has(r.n))return;const miss=r.g.filter(k=>!(st[k]>0));if(miss.length>1)return;
+   const sc=(miss.length?0:100)+r.g.reduce((a,k)=>a+Math.min(st[k]||0,3),0)*2+r.g.length*3-(cc[r.cat]||0)*18+Math.random()*12;
+   if(sc>bs){bs=sc;best=r}});
+  if(!best)return{d,n:''};used.add(best.n);cc[best.cat]=(cc[best.cat]||0)+1;best.g.forEach(k=>{if(st[k]>0)st[k]--});return{d,n:best.n}});
+ save();draw()}
+function planText(){return '🍲 جدول الأكل الأسبوعي:\n'+S.plan.map(p=>p.d+': '+(RI[p.n]?RI[p.n].e+' '+p.n:'-')).join('\n')}
+function recText(n){const r=RI[n];return `${r.e} ${r.n} (${r.t} دقيقة، ${r.sv} أشخاص)\nالمكونات:\n${r.i.map(x=>'- '+x).join('\n')}\nالطريقة:\n${r.s.map((x,j)=>(j+1)+'. '+x).join('\n')}`}
+function modal(h){const m=$('#m');m.innerHTML='<div class="sh" role="dialog">'+h+'</div>';m.classList.add('on')}
+function closeModal(){$('#m').classList.remove('on')}
+$('#m').addEventListener('click',e=>{if(e.target.id==='m')closeModal()});
+function openRecipe(n){const r=RI[n];if(!r)return;
+ const ing=r.i.map(it=>{const k=r.g.find(k=>norm(it).startsWith(norm(k)));return`<div class="ing"><span class="${k?(have(k)?'ok':'warn'):''}">${k?(have(k)?'✔':'✖'):'•'}</span>${esc(it)}${k&&!have(k)?' (ناقص)':''}</div>`}).join('');
+ modal(`<div class="hero" style="background:${r.c}">${r.e}</div><button class="x sec" onclick="closeModal()">إغلاق</button><h2 style="margin-top:0">${esc(r.n)}</h2>
+<p style="color:var(--mut);margin:0 0 6px">⏱ ${r.t} دقيقة · 🍽 ${r.sv} أشخاص · ${r.cat}</p>
+<b>المكونات</b>${ing}
+<p style="color:var(--mut);margin:6px 0">✔ موجود في خزينك، ✖ ناقص. الباقي من البيت.</p>
+<b>الطريقة</b><ol>${r.s.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>
+<div class="row"><label class="pri" style="border-radius:14px;padding:10px 16px;font-weight:700;cursor:pointer">📸 خلصتها! صوّري الأكلة<input type="file" accept="image/*" capture="environment" hidden onchange="photo('${esc(r.n)}',this.files[0])"></label>
+<button class="sec" onclick="share(recText('${esc(r.n)}'))">💬 ابعتي الوصفة لصاحبتك</button></div>`)}
+function shrink(f){return new Promise(ok=>{const im=new Image();im.onload=()=>{const s=Math.min(1,520/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',.72))};im.src=URL.createObjectURL(f)})}
+async function photo(n,f){if(!f)return;const img=await shrink(f);const g={id:Date.now(),n,img,t:new Date().toLocaleDateString('ar-EG')};S.gal.unshift(g);save();toast('اتحفظت في أكلاتي');dish(g.id)}
+function dish(id){const g=S.gal.find(x=>x.id===id);if(!g)return;const r=RI[g.n]||{e:'🍽'};
+ modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>${r.e} ${esc(g.n)}</h2><img src="${g.img}" alt="${esc(g.n)}" style="width:100%;border-radius:18px"><small>${g.t}</small>
+<div class="row"><button class="pri" onclick="shareDish(${id})">📣 شاركيها على السوشيال</button><button class="dng" onclick="del(${id})">مسح</button></div>`)}
+const dishText=g=>`طبخت النهاردة ${g.n} ${(RI[g.n]||{e:''}).e} #إيه_الأكل_النهاردة`;
+function shareDish(id){const g=S.gal.find(x=>x.id===id);share(dishText(g),g.img)}
+function del(id){S.gal=S.gal.filter(x=>x.id!==id);save();closeModal();draw()}
+async function share(text,img){
+ try{if(navigator.share){const d={text};if(img){const f=new File([await (await fetch(img)).blob()],'akla.jpg',{type:'image/jpeg'});if(navigator.canShare&&navigator.canShare({files:[f]}))d.files=[f]}await navigator.share(d);return}}catch(e){if(e&&e.name==='AbortError')return}
+ const q=encodeURIComponent(text);
+ modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>ابعتي لـ…</h2><div class="row"><a class="pri" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/?text=${q}">واتساب</a><a class="sec" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700;color:var(--ink)" href="sms:?&body=${q}">رسالة SMS</a><button class="sec" onclick="copy(${JSON.stringify(text).replace(/"/g,'&quot;')})">نسخ النص</button></div><p style="color:var(--mut)">لو عايزة تنزّلي الصورة على فيسبوك أو إنستجرام، احفظيها وانشريها من التطبيق.</p>`)}
+function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('اتنسخ'),()=>toast('مقدرتش أنسخ'))}catch(e){toast('مقدرتش أنسخ')}}
+function libList(){
+ const q=norm(lib.q.trim());
+ let L=R.filter(r=>(!lib.cat||r.cat===lib.cat)&&(!q||norm(r.n).includes(q)||r.g.some(k=>norm(k).includes(q)))).map(r=>({r,m:r.g.filter(k=>!have(k)).length}));
+ if(lib.ok)L=L.filter(x=>x.m===0);
+ L.sort((a,b)=>a.m-b.m);const total=L.length;
+ $('#lst').innerHTML=L.slice(0,lib.n).map(x=>`<button class="rrow" onclick="openRecipe('${esc(x.r.n)}')"><span class="tile sm" style="background:${x.r.c}">${x.r.e}</span><span><b>${esc(x.r.n)}</b><small>${x.r.cat} · ${x.r.t} د · ${x.m?'ناقص '+x.m:'<span class="ok">كاملة ✔</span>'}</small></span></button>`).join('')+(total>lib.n?`<button class="sec" style="width:100%" onclick="lib.n+=30;libList()">عرض المزيد (${total-lib.n})</button>`:'')||'<div class="empty">مفيش نتايج</div>';
+ $('#cnt').textContent=total+' أكلة'}
 function draw(){document.querySelectorAll('#n button').forEach((b,i)=>b.classList.toggle('on',i===tab));const v=$('#v');
  if(tab===0){const cats={};S.pantry.forEach(p=>(cats[p.cat]=cats[p.cat]||[]).push(p));
   v.innerHTML=`<div style="text-align:center;margin:8px 0 14px"><button class="mic${listening?' live':''}" onclick="listen()" aria-label="سجّلي الخزين بصوتك">${listening?'👂':'🎤'}</button><p style="font-weight:700;margin:8px 0 0">${listening?'سامعاكي… قولي اللي في بيتك':'اضغطي وقولي اللي في بيتك'}</p><p style="color:var(--mut);margin:0">مثال: «٢ كيلو رز وفراخ وطماطم وبصل وعدس»</p></div>
   <div class="card"><b>✍️ أو اكتبي الخزين</b><textarea id="inp" placeholder="مثال: ٢ كيلو أرز، فراخ ٣، طماطم، بصل، عدس"></textarea><div class="row"><button class="pri" onclick="add()">➕ ضيفي للخزين</button></div></div>`+
   (S.pantry.length?Object.keys(cats).map(c=>`<h2>${c}</h2><div class="chips">${cats[c].map(p=>`<div class="chip">${p.icon} ${esc(p.k)}<button aria-label="نقّصي" onclick="bump('${esc(p.k)}',-1)">−</button><b>${p.uses}</b><button aria-label="زوّدي" onclick="bump('${esc(p.k)}',1)">+</button></div>`).join('')}</div>`).join('')+`<div class="row"><button class="pri" onclick="tab=1;makePlan()">📅 اعرضي جدول الأسبوع</button><button class="sec" onclick="newWeek()">ابدئي أسبوع جديد</button></div>`:`<div class="empty"><div>🧺</div>الخزين فاضي. قولي أو اكتبي أول أصنافك.</div>`)+
   `<details class="card" style="margin-top:14px"><summary><b>📲 ثبّتيه كتطبيق على الموبايل</b></summary><p>أندرويد: من قايمة كروم (⋮) اختاري «تثبيت التطبيق» أو «إضافة للشاشة الرئيسية».<br>آيفون: من سفاري دوسي على زرار المشاركة ثم «إضافة إلى الشاشة الرئيسية».</p></details>`}
- else if(tab===1){v.innerHTML=S.plan.length?`<div class="row" style="margin:0 0 12px"><button class="pri" onclick="makePlan()">🔄 جدول جديد</button><button class="sec" onclick="share(planText())">💬 ابعتي الجدول</button></div>`+S.plan.map(p=>{if(p.r<0)return`<div class="day" style="cursor:default"><div class="tile" style="background:var(--bg)">➕</div><div><b>${p.d}</b><small>الخزين مش كفاية، ضيفي أصناف</small></div></div>`;const r=R[p.r],m=r.g.filter(k=>!have(k));
-   return`<button class="day" onclick="openRecipe(${p.r})"><div class="tile" style="background:${r.c}">${r.e}</div><div><b>${p.d}: ${r.n}</b><small class="${m.length?'warn':''}">${m.length?'ناقص: '+m.join('، '):'كل مكوناتها موجودة عندك ✔'}</small></div></button>`}).join(''):`<div class="empty"><div>📅</div>قولي الخزين وأنا هملا الجدول لوحدي.<div class="row" style="justify-content:center"><button class="pri" onclick="tab=0;draw()">🎤 سجّلي الخزين</button></div></div>`}
- else{v.innerHTML=S.gal.length?`<div class="row" style="margin:0 0 12px"><button class="sec" onclick="share('معرض أكلاتي:\\n'+S.gal.map(g=>R[g.i].e+' '+R[g.i].n+' ('+g.t+')').join('\\n'))">📣 شاركي أكلاتي</button></div><div class="grid">${S.gal.map(g=>`<button class="dish" onclick="dish(${g.id})"><img src="${g.img}" alt="${R[g.i].n}"><div><b>${R[g.i].e} ${R[g.i].n}</b><br><small style="color:var(--mut)">${g.t}</small></div></button>`).join('')}</div>`:`<div class="empty"><div>📖</div>لسه مفيش أكلات. افتحي أي أكلة في الجدول وصوّريها بعد ما تخلصيها.</div>`}}
-$('#n').innerHTML=[['🧺','الخزين'],['📅','الجدول'],['📖','أكلاتي']].map((t,i)=>`<button onclick="tab=${i};draw()"><span>${t[0]}</span>${t[1]}</button>`).join('');
+ else if(tab===1){v.innerHTML=S.plan.length?`<div class="row" style="margin:0 0 12px"><button class="pri" onclick="makePlan()">🔄 جدول جديد</button><button class="sec" onclick="share(planText())">💬 ابعتي الجدول</button></div>`+S.plan.map(p=>{const r=RI[p.n];if(!r)return`<div class="day" style="cursor:default"><div class="tile" style="background:var(--bg)">➕</div><div><b>${p.d}</b><small>الخزين مش كفاية، ضيفي أصناف</small></div></div>`;const m=r.g.filter(k=>!have(k));
+   return`<button class="day" onclick="openRecipe('${esc(r.n)}')"><div class="tile" style="background:${r.c}">${r.e}</div><div><b>${p.d}: ${esc(r.n)}</b><small class="${m.length?'warn':''}">${m.length?'ناقص: '+m.join('، '):'كل مكوناتها موجودة عندك ✔'} · ${r.t} د</small></div></button>`}).join(''):`<div class="empty"><div>📅</div>قولي الخزين وأنا هملا الجدول لوحدي.<div class="row" style="justify-content:center"><button class="pri" onclick="tab=0;draw()">🎤 سجّلي الخزين</button></div></div>`}
+ else if(tab===2){v.innerHTML=`<input id="q" class="srch" placeholder="🔍 ابحثي عن أكلة أو مكوّن" value="${esc(lib.q)}" oninput="lib.q=this.value;lib.n=30;libList()"><div class="cats"><button class="${lib.cat?'':'on'}" onclick="lib.cat='';lib.n=30;draw()">الكل</button>${Object.keys(CAT).map(c=>`<button class="${lib.cat===c?'on':''}" onclick="lib.cat='${c}';lib.n=30;draw()">${c}</button>`).join('')}</div><label class="chk"><input type="checkbox" ${lib.ok?'checked':''} onchange="lib.ok=this.checked?1:0;lib.n=30;libList()"> اللي أقدر أعملها بخزيني بس</label><p id="cnt" style="color:var(--mut);margin:4px 0"></p><div id="lst"></div>`;libList()}
+ else{v.innerHTML=S.gal.length?`<div class="row" style="margin:0 0 12px"><button class="sec" onclick="share('معرض أكلاتي:\\n'+S.gal.map(g=>g.n+' ('+g.t+')').join('\\n'))">📣 شاركي أكلاتي</button></div><div class="grid">${S.gal.map(g=>`<button class="dish" onclick="dish(${g.id})"><img src="${g.img}" alt="${esc(g.n)}"><div><b>${(RI[g.n]||{e:'🍽'}).e} ${esc(g.n)}</b><br><small style="color:var(--mut)">${g.t}</small></div></button>`).join('')}</div>`:`<div class="empty"><div>📖</div>لسه مفيش أكلات. افتحي أي أكلة وصوّريها بعد ما تخلصيها.</div>`}}
+$('#n').innerHTML=[['🧺','الخزين'],['📅','الجدول'],['📚','المكتبة'],['📖','أكلاتي']].map((t,i)=>`<button onclick="tab=${i};draw()"><span>${t[0]}</span>${t[1]}</button>`).join('');
 draw();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
