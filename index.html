@@ -132,6 +132,36 @@ async function share(text,img){
  const q=encodeURIComponent(text);
  modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>ابعتي لـ…</h2><div class="row"><a class="pri" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700" target="_blank" rel="noopener" href="https://wa.me/?text=${q}">واتساب</a><a class="sec" style="padding:10px 16px;border-radius:14px;text-decoration:none;font-weight:700;color:var(--ink)" href="sms:?&body=${q}">رسالة SMS</a><button class="sec" onclick="copy(${JSON.stringify(text).replace(/"/g,'&quot;')})">نسخ النص</button></div>`)}
 function copy(t){try{navigator.clipboard.writeText(t).then(()=>toast('اتنسخ'),()=>toast('مقدرتش أنسخ'))}catch(e){toast('مقدرتش أنسخ')}}
+let RID=0,RT='',RV=[],OCRW=null;
+function loadOCR(){return new Promise((ok,no)=>{if(window.Tesseract)return ok();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=ok;s.onerror=()=>no(new Error('load'));document.head.appendChild(s)})}
+function prep(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>{const s=Math.min(1,1800/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);const x=c.getContext('2d');x.drawImage(im,0,0,c.width,c.height);const d=x.getImageData(0,0,c.width,c.height),a=d.data;for(let i=0;i<a.length;i+=4){let g=.299*a[i]+.587*a[i+1]+.114*a[i+2];g=Math.max(0,Math.min(255,(g-135)*1.6+135));a[i]=a[i+1]=a[i+2]=g}x.putImageData(d,0,0);ok(c)};im.onerror=no;im.src=URL.createObjectURL(f)})}
+function ocrParse(text){
+ const out={};
+ text.split(/\n+/).forEach(line=>{
+  let t=norm(line.replace(/[\u200e\u200f\u202a-\u202e]/g,'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[|_*~`"]/g,' ');
+  let best=null;
+  ING.forEach(g=>{g[3].split(',').forEach(a=>{const i=t.indexOf(a);if(i>=0&&(!best||i<best[1]))best=[g,i]})});
+  if(!best)return;
+  let n=0,kg=false,m=t.match(/(\d+(?:[.,]\d+)?)\s*(كجم|كيلو|كغ|kg)/i);
+  if(m){n=+m[1].replace(',','.');kg=true}
+  else{m=t.match(/(?:^|\s)[x×]\s*(\d{1,2})(?!\d)|(?:^|\s)(\d{1,2})\s*[x×](?:\s|$)|(\d{1,2})\s*(?:حبه|حبات|قطعه|علبه|عبوه|كيس)/i);if(m)n=+(m[1]||m[2]||m[3])}
+  const g=best[0],u=Math.max(1,Math.round(n?(kg?n*3:n):3));
+  if(out[g[0]])out[g[0]].uses+=u;else out[g[0]]={k:g[0],cat:g[1],icon:g[2],uses:u}
+ });
+ return Object.values(out)}
+async function receipt(f){if(!f)return;const id=++RID;
+ modal(`<button class="x sec" onclick="RID++;closeModal()">إلغاء</button><h2>🧾 بقرا الفاتورة…</h2><progress id="pg" max="100" value="3" style="width:100%"></progress><p id="pt" style="color:var(--mut)">بحمّل القارئ (أول مرة بياخد وقت)…</p>`);
+ try{await loadOCR();const cv=await prep(f);
+  if(!OCRW)OCRW=await Tesseract.createWorker(['ara','eng'],1,{logger:m=>{const p=$('#pg'),t=$('#pt');if(p&&m.progress!=null)p.value=Math.round(m.progress*100);if(t)t.textContent=({'loading tesseract core':'بحمّل القارئ','loading language traineddata':'بحمّل بيانات العربي','initializing api':'بجهّز القارئ','recognizing text':'بقرا الفاتورة'})[m.status]||'بجهّز…'}});
+  const r=await OCRW.recognize(cv);if(id!==RID)return;RT=(r.data&&r.data.text)||'';RV=ocrParse(RT).map(i=>Object.assign({on:1},i));drawReview()
+ }catch(e){if(id!==RID)return;modal(`<button class="x sec" onclick="closeModal()">إغلاق</button><h2>مقدرتش أقرا الفاتورة</h2><p>القارئ محتاج نت أول مرة. لو بتفتحي التطبيق من نسخة كلود، الميزة دي شغالة بس في نسخة GitHub. تقدري تدخلي الخزين بالصوت أو بالكتابة.</p>`)}}
+function rvq(x,d){RV[x].uses=Math.max(1,RV[x].uses+d);drawReview()}
+function drawReview(){
+ modal(`<button class="x sec" onclick="closeModal()">إلغاء</button><h2>🧾 الأصناف اللي لقيتها في الفاتورة</h2>`+
+ (RV.length?`<p style="color:var(--mut);margin:0 0 6px">راجعي الأصناف قبل الإضافة: شيلي العلامة من أي صنف غلط، وعدّلي الكمية.</p>`+RV.map((i,x)=>`<div class="ing" style="align-items:center"><input type="checkbox" ${i.on?'checked':''} onchange="RV[${x}].on=this.checked?1:0" aria-label="${esc(i.k)}"><span style="flex:1">${i.icon} ${esc(i.k)}</span><div class="chip" style="padding:2px 6px"><button aria-label="نقّصي" onclick="rvq(${x},-1)">−</button><b>${i.uses}</b><button aria-label="زوّدي" onclick="rvq(${x},1)">+</button></div></div>`).join('')+`<div class="row"><button class="pri" onclick="okReceipt()">✔ ضيفي المحدد للخزين</button></div>`
+  :`<p>ملقيتش أصناف معروفة في الصورة. جرّبي صورة أوضح بإضاءة كويسة والفاتورة مفرودة، أو سجّلي الخزين بالصوت أو الكتابة.</p>`)+
+ `<details style="margin-top:12px"><summary>النص اللي اتقرا من الفاتورة</summary><pre dir="rtl" style="white-space:pre-wrap;font-family:inherit;color:var(--mut)">${esc(RT||'(فاضي)')}</pre></details>`)}
+function okReceipt(){const it=RV.filter(i=>i.on).map(i=>({k:i.k,cat:i.cat,icon:i.icon,uses:i.uses}));closeModal();if(!it.length)return toast('مفيش أصناف متحددة');addItems(it)}
 function libList(){const q=norm(lib.q.trim());
  let L=R.filter(r=>(!lib.c||r.cat===lib.c)&&(!q||norm(r.n).includes(q)||r.g.some(k=>norm(k).includes(q))));
  L.forEach(r=>r._m=r.g.filter(k=>!have(k)).length);
@@ -145,6 +175,7 @@ function libList(){const q=norm(lib.q.trim());
 function draw(){document.querySelectorAll('#n button').forEach((b,i)=>b.classList.toggle('on',i===tab));const v=$('#v');
  if(tab===0){const cats={};S.pantry.forEach(p=>(cats[p.cat]=cats[p.cat]||[]).push(p));
   v.innerHTML=`<div style="text-align:center;margin:8px 0 14px"><button class="mic${listening?' live':''}" onclick="listen()" aria-label="سجّلي الخزين بصوتك">${listening?'👂':'🎤'}</button><p style="font-weight:700;margin:8px 0 0">${listening?'سامعاكي… قولي اللي في بيتك':'اضغطي وقولي اللي في بيتك'}</p><p style="color:var(--mut);margin:0">مثال: «٢ كيلو رز وفراخ وطماطم وبصل وعدس»</p></div>
+  <div class="card"><b>🧾 أو صوّري فاتورة السوبر ماركت</b><p style="color:var(--mut);margin:2px 0 0">الصورة بتتقرا على جهازك ومش بتتبعت لأي سيرفر.</p><div class="row"><label class="pri" style="border-radius:14px;padding:10px 16px;font-weight:700;cursor:pointer">📷 صوّري الفاتورة<input type="file" accept="image/*" capture="environment" hidden onchange="receipt(this.files[0]);this.value=''"></label><label class="sec" style="border-radius:14px;padding:10px 16px;font-weight:700;cursor:pointer">🖼 من المعرض<input type="file" accept="image/*" hidden onchange="receipt(this.files[0]);this.value=''"></label></div></div>
   <div class="card"><b>✍️ أو اكتبي الخزين</b><textarea id="inp" placeholder="مثال: ٢ كيلو أرز، فراخ ٣، طماطم، بصل، عدس"></textarea><div class="row"><button class="pri" onclick="add()">➕ ضيفي للخزين</button></div></div>`+
   (S.pantry.length?Object.keys(cats).map(c=>`<h2>${c}</h2><div class="chips">${cats[c].map(p=>`<div class="chip">${p.icon} ${esc(p.k)}<button aria-label="نقّصي" onclick="bump('${esc(p.k)}',-1)">−</button><b>${p.uses}</b><button aria-label="زوّدي" onclick="bump('${esc(p.k)}',1)">+</button></div>`).join('')}</div>`).join('')+`<div class="row"><button class="pri" onclick="tab=1;makePlan()">📅 اعرضي جدول الأسبوع</button><button class="sec" onclick="newWeek()">ابدئي أسبوع جديد</button></div>`:`<div class="empty"><div>🧺</div>الخزين فاضي. قولي أو اكتبي أول أصنافك.</div>`)+
   `<details class="card" style="margin-top:14px"><summary><b>📲 ثبّتيه كتطبيق على الموبايل</b></summary><p>أندرويد: من قايمة كروم (⋮) اختاري «تثبيت التطبيق» أو «إضافة للشاشة الرئيسية».<br>آيفون: من سفاري دوسي على زرار المشاركة ثم «إضافة إلى الشاشة الرئيسية».</p></details>`}
